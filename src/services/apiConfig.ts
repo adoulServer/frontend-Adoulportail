@@ -43,6 +43,7 @@ export const API_ENDPOINTS = {
   CERTIFICATION_BY_ID: (id: number) => `/certifications/${id}`,
   TOTAL_CERTIFICATION_PRIX: '/api/certifications/sum-prix',
   CERTIFICATION_TYPES: '/api/certifications/types',
+  DELETE_ALL_CERTIFICATIONS:'/api/certifications/delete-all'
 
 
 };

@@ -31,6 +31,8 @@ const Adouls: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAdoul, setSelectedAdoul] = useState<Adoul | null>(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [isDeleteEnabled, setIsDeleteEnabled] = useState(false);
   const [totalPrix, setTotalPrix] = useState<number>(0);
   const [newAdoul, setNewAdoul] = useState<Omit<Adoul, 'id'>>({
     nom: '',
@@ -60,6 +62,17 @@ const Adouls: React.FC = () => {
       .then((res) => res.json())
       .then((data) => setTotalPrix(data))
       .catch((err) => console.error("Erreur chargement somme des prix:", err));
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      setCurrentDate(now);
+      const day = now.getDate();
+      setIsDeleteEnabled(day === 30 || day === 31);
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const exportToExcel = () => {
@@ -134,6 +147,27 @@ const Adouls: React.FC = () => {
       adoul.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       adoul.location.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+  const handleDeleteAllCertifications = async () => {
+    try {
+      const response = await fetch('http://localhost:9090/api/certifications/delete-all', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Erreur lors de la suppression');
+      }
+  
+      alert('Toutes les certifications ont été supprimées.');
+      // Mettre à jour l'état ou recharger les données si nécessaire
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Une erreur s\'est produite.');
+    }
+  };
+  
 
   return (
     <AppLayout title="Gestion des Adouls">
@@ -148,7 +182,23 @@ const Adouls: React.FC = () => {
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row gap-2 items-center">
+
+          {/* Horloge */}
+          <div className={`text-lg font-semibold ${isDeleteEnabled ? 'text-red-600' : 'text-gray-700'}`}>
+            {currentDate.toLocaleString('fr-FR')}
+          </div>
+
+          {/* Bouton Supprimer */}
+          <Button
+            className="bg-red-600 hover:bg-red-700 text-white"
+            disabled={!isDeleteEnabled}
+            onClick={handleDeleteAllCertifications}
+          >
+            Supprimer toutes les certifications
+          </Button>
+
+          {/* Bouton Somme totale */}
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-certassist-600 hover:bg-certassist-700">
@@ -157,6 +207,7 @@ const Adouls: React.FC = () => {
             </DialogTrigger>
           </Dialog>
 
+          {/* Export Excel */}
           <Button
             variant="outline"
             className="flex items-center gap-2"
@@ -165,8 +216,8 @@ const Adouls: React.FC = () => {
             <FileSpreadsheet size={16} className="text-green-600" />
             Export Excel
           </Button>
-        </div>
 
+        </div>
 
       </div>
 
