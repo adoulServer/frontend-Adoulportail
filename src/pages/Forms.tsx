@@ -86,13 +86,13 @@ const Forms: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     // Validation des champs
     if (!formData.certType || !formData.requesterName || !formData.adoulId || formData.certPrice <= 0) {
       alert("Veuillez remplir tous les champs correctement.");
       return;
     }
-  
+
     const certificationTypeMapping = {
       "زواج": "ZAWAJ",
       "الأملاك": "AMLAK",
@@ -101,17 +101,17 @@ const Forms: React.FC = () => {
       "وصية": "WASIYA",
       "إراثة": "IRATHA",
     };
-    
+
     const certificationData = {
       type: certificationTypeMapping[formData.certType], // Utiliser la valeur en anglais
       nomDemandeur: formData.requesterName,
       prix: parseFloat(formData.certPrice.toString()),
       adoulId: Number(formData.adoulId),
     };
-    
-  
+
+
     console.log('Données envoyées :', certificationData);  // Log des données avant envoi
-  
+
     try {
       const response = await axios.post(
         `${API_BASE_URL}${API_ENDPOINTS.CERTIFICATIONS}`,
@@ -123,7 +123,7 @@ const Forms: React.FC = () => {
           },
         }
       );
-  
+
       if (response.data) {
         alert('Demande soumise avec succès');
         setFormData({
@@ -147,9 +147,34 @@ const Forms: React.FC = () => {
       }
     }
   };
-  
+
   if (isLoading) return <div>Chargement des adouls...</div>;
   if (isError) return <div>Erreur lors du chargement des adouls.</div>;
+
+  const handleDownload = async (certificationId: number) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}${API_ENDPOINTS.CERTIFICATIONS}/${certificationId}/download-word-template`,
+        {
+          responseType: 'blob',
+          headers: getAuthHeaders(),
+        }
+      );
+  
+      // Crée un lien de téléchargement temporaire
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `certification_${certificationId}.docx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Erreur téléchargement certification:', error);
+      alert('Erreur lors du téléchargement du fichier.');
+    }
+  };
+  
 
   return (
     <AppLayout title="Gestion des Formulaires">
@@ -247,6 +272,7 @@ const Forms: React.FC = () => {
                     <th className="px-4 py-3 text-left">Adoul</th>
                     <th className="px-4 py-3 text-left">Date</th>
                     <th className="px-4 py-3 text-left">Prix</th>
+                    <th className="px-4 py-3 text-left">Télécharger</th> {/* <-- ajout */}
                   </tr>
                 </thead>
                 <tbody>
@@ -258,14 +284,24 @@ const Forms: React.FC = () => {
                         <td className="px-4 py-3">{cert.adoul.nom} {cert.adoul.prenom}</td>
                         <td className="px-4 py-3">{new Date(cert.dateCreation).toLocaleDateString()}</td>
                         <td className="px-4 py-3">{cert.prix} DH</td>
+                        <td className="px-4 py-3">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDownload(cert.id)}
+                          >
+                            Télécharger
+                          </Button>
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="text-center py-6">Aucune demande trouvée.</td>
+                      <td colSpan={6} className="text-center py-6">Aucune demande trouvée.</td>
                     </tr>
                   )}
                 </tbody>
+
               </table>
             </CardContent>
           </Card>
