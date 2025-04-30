@@ -19,7 +19,7 @@ import { Search, Plus, UserPlus, Mail, Phone, MapPin, Tag, Award } from 'lucide-
 import { useQuery } from '@tanstack/react-query';
 import { adoulService, Adoul } from '../services/adoulService';
 import { Eye } from 'lucide-react';
-import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders } from '@/services/apiConfig';
+import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders } from '../services/apiConfig';
 
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -147,9 +147,13 @@ const Adouls: React.FC = () => {
       adoul.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       adoul.location.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
   const handleDeleteAllCertifications = async () => {
+    const url = API_BASE_URL + API_ENDPOINTS.DELETE_ALL_CERTIFICATIONS;
+    console.log("URL utilisée pour suppression :", url);
+  
     try {
-      const response = await fetch('electoral-cal-raoufabdelhafidjunior-53c6fab0.koyeb.app/api/certifications/delete-all', {
+      const response = await fetch(url, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -157,18 +161,20 @@ const Adouls: React.FC = () => {
       });
   
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Erreur HTTP:', response.status, errorText);
         throw new Error('Erreur lors de la suppression');
       }
   
       alert('Toutes les certifications ont été supprimées.');
-      // Mettre à jour l'état ou recharger les données si nécessaire
     } catch (error) {
-      console.error('Erreur:', error);
-      alert('Une erreur s\'est produite.');
+      console.error('Erreur JS:', error);
+      alert("Une erreur s'est produite lors de la suppression.");
     }
   };
   
-
+  
+  
   return (
     <AppLayout title="Gestion des Adouls">
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
