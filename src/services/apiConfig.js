@@ -36,5 +36,4 @@ export const API_ENDPOINTS = {
   CERTIFICATION_TYPES: '/api/certifications/types',
   TOTAL_CERTIFICATION_PRIX: '/api/certifications/sum-prix',
   DELETE_ALL_CERTIFICATIONS:'/api/delete-all'
-
 };

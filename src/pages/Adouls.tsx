@@ -149,7 +149,7 @@ const Adouls: React.FC = () => {
   );
   const handleDeleteAllCertifications = async () => {
     try {
-      const response = await fetch(API_BASE_URL + API_ENDPOINTS.DELETE_ALL_CERTIFICATIONS, {
+      const response = await fetch('electoral-cal-raoufabdelhafidjunior-53c6fab0.koyeb.app/api/certifications/delete-all', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
