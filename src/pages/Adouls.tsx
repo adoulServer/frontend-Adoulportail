@@ -149,7 +149,7 @@ const Adouls: React.FC = () => {
   );
   const handleDeleteAllCertifications = async () => {
     try {
-      const response = await fetch('http://localhost:9090/api/certifications/delete-all', {
+      const response = await fetch(API_BASE_URL + API_ENDPOINTS.DELETE_ALL_CERTIFICATIONS, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
