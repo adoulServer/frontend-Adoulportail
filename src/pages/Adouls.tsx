@@ -315,6 +315,8 @@ const Adouls: React.FC = () => {
                                     <th className="px-4 py-2">Type</th>
                                     <th className="px-4 py-2">Prix</th>
                                     <th className="px-4 py-2">Demandeur</th>
+                                    <th className="px-4 py-2">Ich-had</th>
+                                    <th className="px-4 py-2">Registre</th>
                                     <th className="px-4 py-2">Date de création</th>
                                   </tr>
                                 </thead>
@@ -324,6 +326,8 @@ const Adouls: React.FC = () => {
                                       <td className="px-4 py-2">{certif.type}</td>
                                       <td className="px-4 py-2">{certif.prix} DH</td>
                                       <td className="px-4 py-2">{certif.nomDemandeur}</td>
+                                      <td className="px-4 py-2">{certif.registreNumber}</td>
+                                      <td className="px-4 py-2">{certif.ichhadNumber}</td>
                                       <td className="px-4 py-2">{new Date(certif.dateCreation).toLocaleDateString()}</td>
                                     </tr>
                                   ))}

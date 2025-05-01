@@ -6,6 +6,8 @@ export type Certification = {
   type: string;
   nomDemandeur: string;
   prix: number;
+  certRegistre: number;
+  certIchhad: number;
   dateCreation: string;
 };
 

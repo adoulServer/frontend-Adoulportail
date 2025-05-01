@@ -36,6 +36,8 @@ const Forms: React.FC = () => {
     requesterPhone: '',
     adoulId: '',
     certPrice: 0,
+    registreNumber: '',
+    ichhadNumber: '',
   });
 
   useEffect(() => {
@@ -88,11 +90,19 @@ const Forms: React.FC = () => {
     e.preventDefault();
 
     // Validation des champs
-    if (!formData.certType || !formData.requesterName || !formData.adoulId || formData.certPrice <= 0) {
+    if (
+      !formData.certType ||
+      !formData.requesterName ||
+      !formData.adoulId ||
+      Number(formData.certPrice) <= 0 ||
+      Number(formData.registreNumber) <= 0 ||
+      Number(formData.ichhadNumber) <= 0
+    ) {
       alert("Veuillez remplir tous les champs correctement.");
       return;
     }
-
+    
+    
     const certificationTypeMapping = {
       "زواج": "ZAWAJ",
       "الأملاك": "AMLAK",
@@ -103,10 +113,12 @@ const Forms: React.FC = () => {
     };
 
     const certificationData = {
-      type: certificationTypeMapping[formData.certType], // Utiliser la valeur en anglais
+      type: certificationTypeMapping[formData.certType], 
       nomDemandeur: formData.requesterName,
       prix: parseFloat(formData.certPrice.toString()),
       adoulId: Number(formData.adoulId),
+      registreNumber: Number(formData.registreNumber),
+      ichhadNumber: Number(formData.ichhadNumber),
     };
 
 
@@ -132,6 +144,8 @@ const Forms: React.FC = () => {
           requesterPhone: '',
           adoulId: '',
           certPrice: 0,
+          registreNumber: '',
+          ichhadNumber: '',
         });
         const refreshed = await fetchCertifications();
         setCertificates(refreshed);
@@ -243,6 +257,14 @@ const Forms: React.FC = () => {
                     <Label htmlFor="certPrice">Prix (DH)</Label>
                     <Input id="certPrice" type="number" value={formData.certPrice} onChange={handleFormChange} />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="registreNumber">Registre</Label>
+                    <Input id="registreNumber" type="number" value={formData.registreNumber} onChange={handleFormChange} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ichhadNumber">Ich-hade</Label>
+                    <Input id="ichhadNumber" type="number" value={formData.ichhadNumber} onChange={handleFormChange} />
+                  </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button className="bg-certassist-600 hover:bg-certassist-700" type="submit">Soumettre</Button>
@@ -272,6 +294,8 @@ const Forms: React.FC = () => {
                     <th className="px-4 py-3 text-left">Adoul</th>
                     <th className="px-4 py-3 text-left">Date</th>
                     <th className="px-4 py-3 text-left">Prix</th>
+                    <th className="px-4 py-3 text-left">Registre</th>
+                    <th className="px-4 py-3 text-left">Ich-hade</th>
                     <th className="px-4 py-3 text-left">Télécharger</th> {/* <-- ajout */}
                   </tr>
                 </thead>
@@ -284,6 +308,8 @@ const Forms: React.FC = () => {
                         <td className="px-4 py-3">{cert.adoul.nom} {cert.adoul.prenom}</td>
                         <td className="px-4 py-3">{new Date(cert.dateCreation).toLocaleDateString()}</td>
                         <td className="px-4 py-3">{cert.prix} DH</td>
+                        <td className="px-4 py-3">{cert.registreNumber}</td>
+                        <td className="px-4 py-3">{cert.ichhadNumber}</td>
                         <td className="px-4 py-3">
                           <Button
                             size="sm"

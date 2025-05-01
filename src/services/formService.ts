@@ -9,6 +9,8 @@ export interface CertificationForm {
   requesterName: string;
   certificationType: string;
   price: number;
+  Registre: number,
+  Ichhad: number,
   status: string;
   createdAt: string;
   additionalInfo?: string;
