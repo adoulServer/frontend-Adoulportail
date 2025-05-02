@@ -13,46 +13,61 @@ const Dashboard: React.FC = () => {
   const [totalCertification, setTotalCertification] = useState<number>(0);
   const [totalPrix, setTotalPrix] = useState<number>(0);
 
-  // Récupérer le nombre total des adouls
+  // Rafraîchissement automatique toutes les 5s
   useEffect(() => {
-    fetch(API_BASE_URL + API_ENDPOINTS.ADOULS_COUNT, {
-      headers: getAuthHeaders(),
-    })
-      .then(response => response.json())
-      .then(data => setTotalAdouls(data))  // Mettre à jour le total des adouls
-      .catch(error => console.error('Error fetching total adouls:', error));
+    const fetchAdoulsCount = () => {
+      fetch(API_BASE_URL + API_ENDPOINTS.ADOULS_COUNT, {
+        headers: getAuthHeaders(),
+      })
+        .then(response => response.json())
+        .then(data => setTotalAdouls(data))
+        .catch(error => console.error('Error fetching total adouls:', error));
+    };
+
+    const fetchCertificationsCount = () => {
+      fetch(API_BASE_URL + API_ENDPOINTS.CERTIFICATIONS_COUNT, {
+        headers: getAuthHeaders(),
+      })
+        .then(response => response.json())
+        .then(data => setTotalCertification(data))
+        .catch(error => console.error('Error fetching total certifications:', error));
+    };
+
+    const fetchTotalPrix = () => {
+      fetch(API_BASE_URL + API_ENDPOINTS.TOTAL_CERTIFICATION_PRIX, {
+        headers: getAuthHeaders(),
+      })
+        .then((res) => res.json())
+        .then((data) => setTotalPrix(data))
+        .catch((err) => console.error("Erreur chargement somme des prix:", err));
+    };
+
+    const refreshData = () => {
+      fetchAdoulsCount();
+      fetchCertificationsCount();
+      fetchTotalPrix();
+    };
+
+    refreshData(); // premier appel
+    const interval = setInterval(refreshData, 5000); // toutes les 5s
+
+    return () => clearInterval(interval); // nettoyage
   }, []);
 
+  // Certification list with auto-refresh every 5s
   const fetchCertifications = async () => {
     const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.CERTIFICATIONS}`, {
       headers: getAuthHeaders(),
     });
     return response.data;
   };
+
   const { data: certifications = [], isLoading } = useQuery({
     queryKey: ['certifications'],
     queryFn: fetchCertifications,
+    refetchInterval: 1000,
   });
 
-  useEffect(() => {
-    fetch(API_BASE_URL + API_ENDPOINTS.CERTIFICATIONS_COUNT, {
-      headers: getAuthHeaders(),
-    })
-      .then(response => response.json())
-      .then(data => setTotalCertification(data))  // Mettre à jour le total des certifications
-      .catch(error => console.error('Error fetching total certifications:', error));
-  }, []);
-
-  useEffect(() => {
-    fetch(API_BASE_URL + API_ENDPOINTS.TOTAL_CERTIFICATION_PRIX, {
-      headers: getAuthHeaders(),
-    })
-      .then((res) => res.json())
-      .then((data) => setTotalPrix(data))
-      .catch((err) => console.error("Erreur chargement somme des prix:", err));
-  }, []);
-
-  // Statistiques
   const stats = [
     {
       title: 'Total Adouls',
@@ -66,7 +81,7 @@ const Dashboard: React.FC = () => {
     },
     {
       title: 'Formulaires',
-      value: totalCertification,  // Assure-toi d'utiliser totalCertification ici aussi si nécessaire
+      value: totalCertification,
       icon: <FileText className="h-8 w-8 text-certassist-600" />
     },
     {
@@ -74,8 +89,8 @@ const Dashboard: React.FC = () => {
       value: `${new Intl.NumberFormat('fr-MA').format(totalPrix)} DH`,
       icon: <DollarSign className="h-8 w-8 text-certassist-600" />
     }
-
   ];
+
   return (
     <AppLayout title="Tableau de Bord">
       <div className="mb-8">
@@ -111,44 +126,41 @@ const Dashboard: React.FC = () => {
             <CardTitle>Activités récentes</CardTitle>
           </CardHeader>
           <CardContent>
-          <div className="space-y-6">
-  {isLoading ? (
-    <p>Chargement...</p>
-  ) : certifications.length === 0 ? (
-    <p>Aucune demande récente.</p>
-  ) : (
-    certifications
-      .slice() // Pour éviter de modifier l'ordre original
-      .slice(0, ) 
-      .map((cert, index) => {
-        const date = new Date(cert.dateCreation);
-        return (
-          <div key={index} className="flex">
-            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-certassist-100 flex items-center justify-center text-certassist-600">
-              <FileText size={20} />
+            <div className="space-y-6">
+              {isLoading ? (
+                <p>Chargement...</p>
+              ) : certifications.length === 0 ? (
+                <p>Aucune demande récente.</p>
+              ) : (
+                certifications
+                  .slice()
+                  .map((cert, index) => {
+                    const date = new Date(cert.dateCreation);
+                    return (
+                      <div key={index} className="flex">
+                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-certassist-100 flex items-center justify-center text-certassist-600">
+                          <FileText size={20} />
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-gray-900">
+                            Certification de {cert.type} demandée par {cert.nomDemandeur}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {date.toLocaleDateString('fr-MA', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            })}{' '}
+                            à {date.toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })
+              )}
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-900">
-                Certification de {cert.type} demandée par {cert.nomDemandeur}
-              </p>
-              <p className="text-sm text-gray-500">
-                {date.toLocaleDateString('fr-MA', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}{' '}
-                à {date.toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' })}
-              </p>
-            </div>
-          </div>
-        );
-      })
-  )}
-</div>
-
           </CardContent>
         </Card>
-
 
         <Card>
           <CardHeader>
@@ -190,7 +202,3 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
-function setTotalAdouls(data: any): any {
-  throw new Error('Function not implemented.');
-}
-

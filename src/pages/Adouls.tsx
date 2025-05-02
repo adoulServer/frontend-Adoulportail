@@ -74,7 +74,7 @@ const Adouls: React.FC = () => {
 
     return () => clearInterval(interval);
   }, []);
-
+  
   const exportToExcel = () => {
     const exportData = filteredAdouls.map(adoul => ({
       Nom: adoul.nom,
